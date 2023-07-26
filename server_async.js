@@ -12,11 +12,11 @@ async function main() {
       {
         host: 'localhost',
         user: 'root',
-        password: '',
-        database: 'classlist_db'
+        password: 'Poppop',
+        database: 'job_db'
       },
     );
-    const [rows, fields]  = await db.query('SELECT * FROM students' );
+    const [rows, fields]  = await db.query('SELECT * FROM department' );
     console.table(rows)  
   } catch (error) {
     console.log(error);
