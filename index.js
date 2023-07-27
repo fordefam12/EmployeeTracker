@@ -82,18 +82,93 @@ const userInput = () =>
       if (answers.prompt === "view department budgets") {
         showBugets();
       }
-      console.log(answers.prompt);
+      
     });
 
 showDepartments = () => {
   // Query database
-  db.query(`SELECT * FROM department`, (err, results) => {
+  const sql = `SELECT department.id AS id, department.name AS department FROM department`;
+  db.query(`SELECT * FROM department`,(sql, (err, results) => {
     if (err) throw err;
     console.log("viewing all departments:");
     console.table(results);
     userInput();
-  });
+  }));
 }
+showRoles = () => {
+  const sql = `SELECT roles.id AS id, roles.title, department.name AS department FROM roles INNER JOIN department ON role.department_id = department.id`;
+  // Query database
+  db.query(`SELECT * FROM roles`,(sql, (err, results) => {
+    if (err) throw err;
+    console.log("viewing all roles:");
+    console.table(results);
+    userInput();
+  }));
+}
+showEmployees = () => {
+  const sql = `SELECT employee.id, employee.first_name,employee.last_name,role.title, department.name AS department,role.salary,CONCAT(manager.first_name,"",manager.last_name) AS manager FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN department ON role.department_id = department.id LEFT JOIN employee manager ON employee.manager_id = manager.id`; 
+  // Query database
+  db.query(`SELECT * FROM employee`,(sql, (err, results) => {
+    if (err) throw err;
+    console.log("viewing all employees:");
+    console.table(results);
+    userInput();
+  }));
+}
+addDepartment = () => {
+  inquirer.prompt([{
+    type:'input',
+    name:'addDept',
+    message: "what department do you want to add ?",
+    validate: (addDept) => {
+      if (addDept){
+        // console.log(addDept);
+      return true;
+    }else {
+      console.log('please enter a department');
+      return false;
+    }
+  }}])
+  .then (answer =>{
+    const sql = `INSERT INTO department (name) VALUES (?)`;
+    db.query(sql, answer.addDept, (err, result) => {
+      console.log(answer.addDept);
+      if (err) throw err;
+      console.log('Added ' +  answer.addDept + " to departments!");
+      showDepartments();
+  })})};
+
+updateRole = () => {
+  // Query database
+  db.query(`SELECT * FROM employee`, (err, data) => {
+    if (err) throw err;
+    const employees = data.map(({ id, first_name, last_name }) => ({name: first_name +""+ last_name, value: id}));
+    inquirer.prompt([{
+      type: 'list',
+      name:'name',
+      message: "which employee would like to update ?",
+      choices: employees
+    }])
+    .then (empChoice => {
+      const employee = empChoice.name;
+      const params = [];
+      params.push(employee);
+      db.query(`SELECT * FROM roles`, (err, data) => {
+        if (err) throw err;
+        const roles = data.map (({ id, title}) => ({ name:title, value:id }));
+        inquirer.prompt([{
+          type: 'list',
+          name:'role',
+          message:'what is the employee role ?',
+          choices: roles
+
+        }])
+    })
+    console.log("updating employee");
+    console.table(data);
+    userInput();
+  })})};
+  
 showRoles = () => {
   // Query database
   db.query(`SELECT * FROM roles`, (err, results) => {
