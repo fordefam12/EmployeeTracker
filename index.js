@@ -1,5 +1,5 @@
-
 const inquirer = require("inquirer");
+const { default: Choice } = require("inquirer/lib/objects/choice");
 
 
 // Import and require mysql2
@@ -18,90 +18,89 @@ const db = mysql.createConnection(
   console.log(`Connected to the job database.`)
 );
 
-// Query database
-db.query("SELECT * FROM department", function (err, results) {
-  if (err) {
-    console.log(err);
-    return;
-  }
-  // console.table(results);
-  userInput()
-});
 const userInput = () =>
-  inquirer.prompt([
-    {
-      type: "list",
-      name: "options",
-      message: "what would you like to do ?",
-      choices: [
-        "View all departments",
-        "View all roles",
-        "View all employees",
-        "Add a department",
-        "Add a role",
-        "Add an employee",
-        "update an employee role",
-        "Update an emploee Manager",
-        "View an employee by departments",
-        "delete an employee",
-        "delete a role",
-        "delete a department",
-        "view department budgets",
-      ],
-    }
-  ])
-    .then((answers)=> {
-      const {choices} = answers
-    
-    
-      if (choices === "View all departments"){
+  inquirer
+    .prompt([
+      {
+        type: "list",
+        name: "prompt",
+        message: "what would you like to do ?",
+        choices: [
+          "View all departments",
+          "View all roles",
+          "View all employees",
+          "Add a department",
+          "Add a role",
+          "Add an employee",
+          "update an employee role",
+          "Update an emploee Manager",
+          "View an employee by departments",
+          "delete an employee",
+          "delete a role",
+          "delete a department",
+          "view department budgets",
+        ],
+      },
+    ])
+    .then((answers) => {
+      if (answers.prompt === "View all departments") {
         showDepartments();
       }
-      if (choices === "View all roles"){
+      if (answers.prompt === "View all roles") {
         showRoles();
       }
-      if (choices === "View all employees"){
+      if (answers.prompt=== "View all employees") {
         showEmployees();
       }
-      if (choices === "Add a department"){
+      if (answers.prompt === "Add a department") {
         addDepartment();
       }
-      if (choices === "Add a role"){
+      if (answers.prompt === "Add a role") {
         addRole();
       }
-      if (choices === "Add an employee"){
+      if (answers.prompt === "Add an employee") {
         addEmployee();
       }
-      if (choices === "update an employee role"){
+      if (answers.prompt === "update an employee role") {
         updateRole();
       }
-      if (choices === "Update an emploee Manager"){
+      if (answers.prompt=== "Update an emploee Manager") {
         updateManager();
       }
-      if (choices === "View an employee by departments"){
+      if (answers.prompt === "View an employee by departments") {
         showEmployeeDepartments();
       }
-      if (choices === "delete an employee"){
+      if (answers.prompt === "delete an employee") {
         deleteEmployee();
       }
-      if (choices === "delete a role"){
+      if (answers.prompt=== "delete a role") {
         deleteRole();
       }
-      if (choices === "delete a department"){
+      if (answers.prompt === "delete a department") {
         deleteDepartment();
       }
-      if (choices === "view department budgets"){
+      if (answers.prompt === "view department budgets") {
         showBugets();
       }
-      
-  });
-  showDepartments = () => {
-      console.log("showing all departemnts.../n");
-      const sql = `SELECT department.id AS id, department  FROM department `;
+      console.log(answers.prompt);
+    });
 
-      db.promise().queery(sql, (err,rows) => {
-        if (err) throw err;
-        console.table(rows);
-        userInput();
-      })
-  }
+showDepartments = () => {
+  // Query database
+  db.query(`SELECT * FROM department`, (err, results) => {
+    if (err) throw err;
+    console.log("viewing all departments:");
+    console.table(results);
+    userInput();
+  });
+}
+showRoles = () => {
+  // Query database
+  db.query(`SELECT * FROM roles`, (err, results) => {
+    if (err) throw err;
+    console.log("viewing all roles:");
+    console.table(results);
+    userInput();
+  });
+}
+userInput();
