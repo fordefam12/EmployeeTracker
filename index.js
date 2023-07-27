@@ -161,7 +161,7 @@ addRole = () => {
         type: "input",
         name: "role",
         message: "what role do you want to add ?",
-        validate: addRole => {
+        validate: (addRole) => {
           if (addRole) {
             // console.log(addRole);
             return true;
@@ -172,34 +172,48 @@ addRole = () => {
         },
       },
       {
-        type:'input',
-        name: 'salary',
+        type: "input",
+        name: "salary",
         message: " what is the salary for this role ?",
-        validate: addRole => {
+        validate: (addRole) => {
           if (addRole) {
             return true;
-          }else {
-            console.log('please enter a salry');
+          } else {
+            console.log("please enter a salry");
             return false;
           }
-        }
-      }
+        },
+      },
     ])
     .then((answer) => {
-      
-      db.query('SELECT name, ID from department',(err, data) => {
-        console.log(data);
+      // console.log("THIS IS ANSWER!!!!!!!!!!!!!!!!!!!!!",answer);
+      db.query("SELECT name, ID from department", (err, data) => {
+        // console.log(data);
         if (err) throw err;
-        const dept = data.map(({ name, id}) => ({name:name, value:id}));
-        inquirer.prompt([{
-          type:'list',
-          name:'dept',
-          message: "what department is this role for in ?",
-          choices: dept
-        }])
-        
-        console.log("Added " + answer.addDept + " to departments!");
-        showRoles();
+        const dept = data.map(({ name, ID }) => ({ name: name, value: ID }));
+        console.log("this is department", dept);
+        inquirer
+          .prompt([
+            {
+              type: "list",
+              name: "dept",
+              message: "what department is this role for in ?",
+              choices: dept,
+            },
+          ])
+          .then((deptChoice) => {
+            // console.log(deptChoice);
+            let params = [answer.role, answer.salary];
+            const dept = deptChoice.dept;
+            params.push(dept);
+            // console.log(params);
+            const sql = `INSERT INTO roles (title, salary, department_id) VALUES (?,?,?)`;
+            db.query(sql, params, (err, result) => {
+              if (err) throw err;
+              console.log("added " + answer.role + " to roles!");
+              showRoles();
+            });
+          });
       });
     });
 };
@@ -212,7 +226,7 @@ updateRole = () => {
       name: first_name + " " + last_name,
       value: id,
     }));
-    console.log(employees);
+    // console.log(employees);
     inquirer
       .prompt([
         {
@@ -227,7 +241,7 @@ updateRole = () => {
         const params = [];
         params.push(employee);
         db.query(`SELECT * FROM roles`, (err, data) => {
-          console.log(data);
+          // console.log(data);
           if (err) throw err;
 
           const roles = data.map(({ id, title }) => ({
@@ -244,32 +258,89 @@ updateRole = () => {
               },
             ])
             .then((roleChoice) => {
-              const role = roleChoice.role;
+              const role = roleChoice.roles;
               console.log(role);
               params.push(role);
-              let employee = params[0];
+              // let employee = params[0];
               params[0] = role;
               params[1] = employee;
-              console.log(params);
+              // console.log("this is params!!!!!!!!!",params);
               const sql = `UPDATE employee SET roles_id = ? WHERE id = ?`;
               db.query(sql, params, (err, result) => {
                 if (err) throw err;
                 console.log("updating employee");
+                showEmployees();
               });
             });
-          showEmployees();
         });
       });
   });
 };
 
-// showRoles = () => {
-//   // Query database
-//   db.query(`SELECT * FROM roles`, (err, results) => {
-//     if (err) throw err;
-//     console.log("viewing all roles:");
-//     console.table(results);
-//     userInput();
-//   });
-// }
+addEmployee = () => {
+  inquirer.prompt([
+    {
+      type: "input",
+      name: 'fistName',
+      message: "what is the employees first anme ?",
+      validate: (addFirst) => {
+        if (addFirst) {
+          return true;
+        } else {
+          console.log("please enter a first name");
+          return false;
+        }
+      },
+    },
+    {
+      type: "input",
+      name: 'lastName',
+      message: " what is the lasst name of the employee",
+      validate: addLast => {
+        if(addLast){
+          return true;
+        }else {
+          console.log('please enter a last name');
+          return false;
+        }
+      }
+    },
+  ])
+  .then(answer => {
+    const params = [answer.firstName, answer.lastName]
+    db.query(`SELECT roles.id,roles.title FROM roles`, (err, data) => {
+      if (err) throw err;
+      const roles = data.map(({ id, title }) => ({name:title,value:id }));
+      inquirer.prompt([{
+        type:'list',
+        name:'role',
+        message:"what is the employees role ?",
+        choices:roles
+      }]).then(roleChoice => {
+        const role = roleChoice.role;
+        params.push(role);
+        db.query(`SELECT *FROM employee`, (err, data) => {
+          if (err) throw err;
+          const managers = data.map(({ id, first_name, last_name}) => ({ name: first_name +" "+ last_name, value: id}))
+      })
+        inquirer.prompt([{
+          type:'list',
+          name:'manager',
+          message:'who is the employees manager ?',
+          choices: managers
+        }])
+        .then(managerChocie => {
+          const manager = managerChocie.manager;
+          params.push(manager);
+          const sql = `INSERT INTO employee (first_name, lasyt_name, roles_id, manager_id) VALUES (?,?,?,?)`;
+          db.query(sql, params, (err, result) => {
+            if (err) throw err;
+            console.log("employee has been added");
+            showEmployees();
+        });
+      });
+      });
+    });  
+})
+};
 userInput();
