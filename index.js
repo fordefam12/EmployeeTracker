@@ -33,7 +33,7 @@ const userInput = () =>
           "Add a role",
           "Add an employee",
           "update an employee role",
-          "Update an emploee Manager",
+          "Update an employee Manager",
           "View an employee by departments",
           "delete an employee",
           "delete a role",
@@ -64,7 +64,7 @@ const userInput = () =>
       if (answers.prompt === "update an employee role") {
         updateRole();
       }
-      if (answers.prompt === "Update an emploee Manager") {
+      if (answers.prompt === "Update an employee Manager") {
         updateManager();
       }
       if (answers.prompt === "View an employee by departments") {
@@ -418,5 +418,95 @@ showEmployeeDepartments = () => {
 
     userInput();
   });
+};
+deleteDepartment = () => {
+  const deptSql = `SELECT * FROM department`;
+  db.query(deptSql, (err, data) => {
+    if (err) throw err;
+    const dept = data.map(({name, id }) => ({ name:name, value:id}));
+    inquirer.prompt([{
+      type:'list',
+      name: 'dept',
+      message:"what department do you want to delte ?",
+      choices: dept
+    }])
+    .then(deptChoice => {
+      const dept = deptChoice.dept;
+      const sql = `DELETE FROM department WHERE id = ?`
+      db.query(sql, dept, (err, result) => {
+        if (err) throw err;
+        console.log("successfully deleted");
+        showDepartments();
+      })
+    })
+  console.log('successfully deleted');
+  })
+};
+deleteRole = () => {
+  db.query(`SELECT *FROM roles`, (err, data) => {
+    if (err) throw err;{
+    const role = data.map(({title, id}) => ({name: title, value: id}));
+    inquirer.prompt([{
+      type:'list',
+      name:'role',
+      message: "what role do you want to delete ?",
+      choices: role
+    }])
+    .then(roleChoice => {
+      const role = roleChoice.role;
+      const sql = `DELETE FROM roles WHERE id = ?`;
+      db.query(sql, role, (err, result) => {
+        if (err) throw err;
+        console.log("successfully deleted");
+        showRoles();
+
+    })
+    })
+  }})
+};
+deleteEmployee = () => {
+  db.query(`SELECT * FROM employee`, (err,data) =>{
+    if (err)throw err;
+    const employees = data.map (({ id, first_name, last_name})=> ({name:first_name + " "+ last_name, value: id}));
+    inquirer.prompt([{
+      type:'list',
+      name: 'name',
+      message: "which employee would you like to delete ?",
+      choices: employees
+    }])
+    .then(empChoice => {
+      const employee = empChoice.name;
+      const sql = `DELETE FROM employee WHERE id = ?`;
+      db.query(sql,employee, (err, result) => {
+        if (err) throw err;
+        console.log("successfully deleted");
+        showEmployees();
+      })
+    })
+  })
+};
+showBugets = () => {
+  console.log('showing budget');
+  const sql =` SELECT department_id AS id,
+  department.name AS department, SUM(salary) AS budget FROM roles JOIN department ON roles.department_id = department.id GROUP BY  department_id`;
+  db.query(sql, (err, rows) => {
+    if (err) throw err;
+    console.table(rows);
+    userInput();
+  })
+};
+showDepartments = () => {
+  // Query database
+  const sql = `SELECT department.id AS id, department.name AS department FROM department`;
+  db.query(
+    `SELECT * FROM department`,
+    (sql,
+    (err, results) => {
+      if (err) throw err;
+      console.log("viewing all departments:");
+      console.table(results);
+      userInput();
+    })
+  );
 };
 userInput();
