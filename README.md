@@ -1,6 +1,6 @@
 
 # EmployeeTracker
-[![License: undefined](https://img.shields.io/badge/License-The_Unlicense-brightgreen.svg)](https://opensource.org/licenses/The_Unlicense)
+![JavaScript](https://img.shields.io/badge/JavaScript-100%25-purple)
 
 
 ## Description
@@ -45,6 +45,7 @@ N/A
 The_Unlicense
 
 ## badges
+![JavaScript](https://img.shields.io/badge/JavaScript-100%25-purple)
 
 ## Tests
 N/A
@@ -53,6 +54,15 @@ N/A
 Any questions about this project please send me a message on *https://github.com/fordefam12 or email me at [fordefam12@gmail.com]
 
 ## URL
-  
+  https://github.com/fordefam12/EmployeeTracker
 
+![QR CODE](qr-code.png)
 ## screenshot
+
+![screenshot](<screenshot employee tracker.png>)
+
+## Video
+
+https://www.awesomescreenshot.com/video/19490019?key=3148e33e813d3ddc9c0ccf8a9e519592
+
+<video src="employee%20tracker.mp4" controls title=""></video>
